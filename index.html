@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babamın İş Takvimi</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#1b4332">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Lexend', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .touch-target { min-height: 54px; min-width: 54px; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 antialiased min-h-screen pb-12">
+
+    <!-- Top Header -->
+    <header class="bg-emerald-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-emerald-700 rounded-2xl flex items-center justify-center text-emerald-100 shadow-inner">
+                    <i class="fa-solid fa-calendar-check text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight leading-tight">Babamın İş Takvimi</h1>
+                    <p class="text-xs text-emerald-200">Her gün bir dokunuş yeterli.</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-md mx-auto px-4 mt-4 space-y-5">
+
+        <!-- Calendar Card -->
+        <section class="bg-white rounded-3xl p-4 shadow-sm border border-gray-100">
+            <!-- Calendar Navigation Header -->
+            <div class="flex items-center justify-between mb-4">
+                <button id="prevMonthBtn" aria-label="Önceki Ay" class="touch-target p-3 text-gray-600 hover:text-emerald-800 hover:bg-emerald-50 rounded-2xl transition flex items-center justify-center">
+                    <i class="fa-solid fa-chevron-left text-xl"></i>
+                </button>
+                <div class="text-center">
+                    <h2 id="currentMonthYear" class="text-xl font-bold text-gray-900 capitalize">---</h2>
+                </div>
+                <button id="nextMonthBtn" aria-label="Sonraki Ay" class="touch-target p-3 text-gray-600 hover:text-emerald-800 hover:bg-emerald-50 rounded-2xl transition flex items-center justify-center">
+                    <i class="fa-solid fa-chevron-right text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Weekdays Row -->
+            <div class="grid grid-cols-7 text-center font-semibold text-xs text-gray-400 mb-2">
+                <div>Pzt</div>
+                <div>Sal</div>
+                <div>Çar</div>
+                <div>Per</div>
+                <div>Cum</div>
+                <div>Cmt</div>
+                <div>Paz</div>
+            </div>
+
+            <!-- Calendar Grid -->
+            <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 text-center">
+                <!-- Days will be generated dynamically -->
+            </div>
+        </section>
+
+        <!-- Monthly Earnings Card -->
+        <section class="bg-gradient-to-br from-emerald-800 to-emerald-950 text-white rounded-3xl p-5 shadow-xl space-y-4">
+            <div class="flex items-center justify-between border-b border-emerald-700/50 pb-3">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-wallet text-emerald-300 text-lg"></i>
+                    <h3 class="text-lg font-bold">Aylık Kazanç Hesaplama</h3>
+                </div>
+                <span class="text-xs bg-emerald-700/60 text-emerald-200 px-2.5 py-1 rounded-full border border-emerald-600/40">Bu Ay</span>
+            </div>
+
+            <div class="space-y-2">
+                <label for="dailyWageInput" class="block text-xs font-medium text-emerald-200">Günlük Yevmiye Ücreti (TL)</label>
+                <div class="relative">
+                    <input type="number" id="dailyWageInput" min="0" step="50" placeholder="0" class="w-full bg-emerald-900/60 border border-emerald-600/50 rounded-2xl px-4 py-3 text-white text-lg font-bold placeholder-emerald-500/50 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-300 font-bold">TL</span>
+                </div>
+            </div>
+
+            <div class="bg-emerald-900/40 rounded-2xl p-4 border border-emerald-700/30 space-y-2">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-emerald-200">Çalışılan Gün:</span>
+                    <span id="calcWorkDays" class="font-bold text-white text-base">0 Gün</span>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-emerald-200">Günlük Yevmiye:</span>
+                    <span id="calcDailyWage" class="font-bold text-white text-base">0 TL</span>
+                </div>
+                <div class="border-t border-emerald-700/40 pt-2 flex justify-between items-center">
+                    <span class="text-emerald-100 font-semibold">Toplam Aylık Kazanç:</span>
+                    <span id="totalEarnings" class="text-2xl font-black text-emerald-300">0 TL</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Monthly Statistics Cards -->
+        <section class="space-y-3">
+            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider px-1">Aylık Özet</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-emerald-50 border border-emerald-200/80 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
+                    <div class="flex items-center space-x-2 text-emerald-700 mb-1">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span class="text-xs font-bold">İşe Gitti</span>
+                    </div>
+                    <div id="statWorkDays" class="text-3xl font-extrabold text-emerald-800">0</div>
+                    <span class="text-[10px] text-emerald-600 mt-1">Gün Çalışıldı</span>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200/80 rounded-2xl p-4 flex flex-col justify-between shadow-sm">
+                    <div class="flex items-center space-x-2 text-blue-700 mb-1">
+                        <i class="fa-solid fa-sun"></i>
+                        <span class="text-xs font-bold">İzinli / Gitmedi</span>
+                    </div>
+                    <div id="statOffDays" class="text-3xl font-extrabold text-blue-800">0</div>
+                    <span class="text-[10px] text-blue-600 mt-1">Gün TatilYapıldı</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-3 border border-gray-200/70 shadow-sm flex items-center justify-between text-xs text-gray-600">
+                <span class="font-medium">Toplam İşaretlenen Gün:</span>
+                <span id="statTotalMarked" class="font-bold text-gray-800 text-sm">0 Gün</span>
+            </div>
+        </section>
+
+        <!-- Tools & Backup Controls -->
+        <section class="bg-white rounded-2xl p-4 border border-gray-200/70 shadow-sm space-y-3">
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Yedekleme ve Yönetim</h3>
+            <div class="grid grid-cols-2 gap-2">
+                <button id="downloadBackupBtn" class="touch-target bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-3 px-3 rounded-xl transition flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-download text-emerald-700"></i>
+                    <span>Yedeği İndir</span>
+                </button>
+                <label class="touch-target bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold py-3 px-3 rounded-xl transition flex items-center justify-center space-x-2 cursor-pointer">
+                    <i class="fa-solid fa-upload text-blue-700"></i>
+                    <span>Yedek Yükle</span>
+                    <input type="file" id="restoreBackupInput" accept=".json" class="hidden">
+                </label>
+            </div>
+            <button id="resetMonthBtn" class="w-full text-xs text-red-500 hover:text-red-700 font-medium py-2 border border-red-100 rounded-xl hover:bg-red-50 transition">
+                <i class="fa-solid fa-rotate-left mr-1"></i> Bu Ayı Temizle
+            </button>
+        </section>
+
+    </main>
+
+    <!-- App Script -->
+    <script>
+        // Data Structures & Storage
+        const STORAGE_KEY = 'babam_takvim_data_v1';
+
+        // State variables
+        let currentDate = new Date();
+        let currentYear = currentDate.getFullYear();
+        let currentMonth = currentDate.getMonth(); // 0-11
+
+        // Main Data Store
+        // Format: { "YYYY-MM": { wage: 1000, days: { "YYYY-MM-DD": 1 } } }
+        // 1: Worked (Green), 2: Day Off (Blue), undefined/0: Unmarked
+        let appData = loadData();
+
+        function loadData() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                return stored ? JSON.parse(stored) : {};
+            } catch (e) {
+                console.error("Storage error", e);
+                return {};
+            }
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+            } catch (e) {
+                console.error("Save error", e);
+            }
+        }
+
+        function getMonthKey(year, month) {
+            const m = String(month + 1).padStart(2, '0');
+            return `${year}-${m}`;
+        }
+
+        function getMonthData(year, month) {
+            const key = getMonthKey(year, month);
+            if (!appData[key]) {
+                appData[key] = { wage: 0, days: {} };
+            }
+            return appData[key];
+        }
+
+        // Calendar Rendering
+        const monthNamesTurkish = [
+            "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+            "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+        ];
+
+        function renderCalendar() {
+            const monthYearText = document.getElementById('currentMonthYear');
+            monthYearText.textContent = `${monthNamesTurkish[currentMonth]} ${currentYear}`;
+
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+
+            const firstDayIndex = (new Date(currentYear, currentMonth, 1).getDay() + 6) % 7; // Monday = 0
+            const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+            const monthData = getMonthData(currentYear, currentMonth);
+
+            // Empty slots for previous month padding
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = "h-14 rounded-2xl bg-transparent";
+                calendarGrid.appendChild(emptyCell);
+            }
+
+            const today = new Date();
+            const isCurrentRealMonth = today.getFullYear() === currentYear && today.getMonth() === currentMonth;
+
+            for (let day = 1; day <= totalDaysInMonth; day++) {
+                const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const state = monthData.days[dateKey] || 0;
+
+                const dayCell = document.createElement('button');
+                dayCell.className = "h-14 rounded-2xl flex flex-col items-center justify-center p-1 relative transition-all active:scale-95 touch-target shadow-sm border";
+
+                const isToday = isCurrentRealMonth && today.getDate() === day;
+
+                if (state === 1) { // Worked
+                    dayCell.className += " bg-emerald-600 border-emerald-700 text-white";
+                    dayCell.innerHTML = `
+                        <span class="text-xs font-bold leading-none">${day}</span>
+                        <i class="fa-solid fa-check text-base mt-1"></i>
+                        <span class="text-[9px] leading-tight font-medium opacity-90">İşe gitti</span>
+                    `;
+                } else if (state === 2) { // Day Off
+                    dayCell.className += " bg-blue-500 border-blue-600 text-white";
+                    dayCell.innerHTML = `
+                        <span class="text-xs font-bold leading-none">${day}</span>
+                        <i class="fa-solid fa-sun text-base mt-1"></i>
+                        <span class="text-[9px] leading-tight font-medium opacity-90">İzinli</span>
+                    `;
+                } else { // Unmarked
+                    dayCell.className += " bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100";
+                    dayCell.innerHTML = `
+                        <span class="text-sm font-bold">${day}</span>
+                    `;
+                }
+
+                if (isToday) {
+                    const todayBadge = document.createElement('span');
+                    todayBadge.className = "absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-400 ring-2 ring-white";
+                    dayCell.appendChild(todayBadge);
+                }
+
+                dayCell.addEventListener('click', () => toggleDayState(dateKey));
+                calendarGrid.appendChild(dayCell);
+            }
+
+            updateCalculations();
+        }
+
+        function toggleDayState(dateKey) {
+            const monthData = getMonthData(currentYear, currentMonth);
+            const currentState = monthData.days[dateKey] || 0;
+            const nextState = (currentState + 1) % 3;
+
+            if (nextState === 0) {
+                delete monthData.days[dateKey];
+            } else {
+                monthData.days[dateKey] = nextState;
+            }
+
+            saveData();
+            renderCalendar();
+        }
+
+        // Calculation & Statistics
+        function updateCalculations() {
+            const monthData = getMonthData(currentYear, currentMonth);
+
+            // Populate Daily Wage
+            const wageInput = document.getElementById('dailyWageInput');
+            wageInput.value = monthData.wage || '';
+
+            let workDays = 0;
+            let offDays = 0;
+
+            Object.values(monthData.days).forEach(state => {
+                if (state === 1) workDays++;
+                if (state === 2) offDays++;
+            });
+
+            const dailyWage = parseFloat(monthData.wage) || 0;
+            const totalSalary = workDays * dailyWage;
+
+            // UI Updates
+            document.getElementById('calcWorkDays').textContent = `${workDays} Gün`;
+            document.getElementById('calcDailyWage').textContent = `${dailyWage.toLocaleString('tr-TR')} TL`;
+            document.getElementById('totalEarnings').textContent = `${totalSalary.toLocaleString('tr-TR')} TL`;
+
+            document.getElementById('statWorkDays').textContent = workDays;
+            document.getElementById('statOffDays').textContent = offDays;
+            document.getElementById('statTotalMarked').textContent = `${workDays + offDays} Gün`;
+        }
+
+        // Wage Input Listener
+        document.getElementById('dailyWageInput').addEventListener('input', (e) => {
+            const monthData = getMonthData(currentYear, currentMonth);
+            monthData.wage = parseFloat(e.target.value) || 0;
+            saveData();
+            updateCalculations();
+        });
+
+        // Navigation Listeners
+        document.getElementById('prevMonthBtn').addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        });
+
+        document.getElementById('nextMonthBtn').addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        });
+
+        // Reset Month
+        document.getElementById('resetMonthBtn').addEventListener('click', () => {
+            if (confirm(`${monthNamesTurkish[currentMonth]} ${currentYear} dönemine ait tüm kayıtları silmek istediğinizden emin misiniz?`)) {
+                const key = getMonthKey(currentYear, currentMonth);
+                delete appData[key];
+                saveData();
+                renderCalendar();
+            }
+        });
+
+        // Download Backup
+        document.getElementById('downloadBackupBtn').addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `babamin_is_takvimi_yedek_${new Date().toISOString().slice(0, 10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        });
+
+        // Restore Backup
+        document.getElementById('restoreBackupInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    if (typeof importedData === 'object' && importedData !== null) {
+                        if (confirm('Mevcut kayıtlar yedek dosyasındaki veriler ile değiştirilecek. Onaylıyor musunuz?')) {
+                            appData = importedData;
+                            saveData();
+                            renderCalendar();
+                            alert('Yedek başarıyla yüklendi!');
+                        }
+                    } else {
+                        alert('Geçersiz yedek dosyası formatı.');
+                    }
+                } catch (err) {
+                    alert('Yedek dosyası okunamadı.');
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW Registered'))
+                    .catch(err => console.error('SW Registration Failed', err));
+            });
+        }
+
+        // Initialize App
+        renderCalendar();
+    </script>
+</body>
+</html>
